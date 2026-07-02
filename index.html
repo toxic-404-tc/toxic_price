@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Toxic_404 料金計算機</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --card: #fff;
+      --line: #d9dde3;
+      --text: #20242a;
+      --muted: #667085;
+      --primary: #2563eb;
+      --secondary: #667085;
+      --shadow: 0 8px 24px rgb(15 23 42 / 8%);
+    }
+
+    body.dark {
+      color-scheme: dark;
+      --bg: #111827;
+      --card: #1f2937;
+      --line: #374151;
+      --text: #f3f4f6;
+      --muted: #a5adba;
+      --primary: #60a5fa;
+      --secondary: #4b5563;
+      --shadow: 0 8px 24px rgb(0 0 0 / 20%);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .wrap {
+      width: min(900px, 100%);
+      margin-inline: auto;
+      padding: 20px;
+    }
+
+    .card {
+      padding: 20px;
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .top,
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .top {
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 4vw, 2rem);
+    }
+
+    table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: .9rem;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    th:nth-child(1) { width: 42%; }
+    th:nth-child(2) { width: 16%; }
+    th:nth-child(3) { width: 230px; }
+    th:nth-child(4) { width: 18%; }
+    td:nth-child(2),
+    td:nth-child(4) { text-align: right; }
+
+    .product {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .product img {
+      width: 64px;
+      height: 64px;
+      flex: 0 0 64px;
+      object-fit: cover;
+      background: #0f172a;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .product strong {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+
+    .qty {
+      display: grid;
+      grid-template-columns: 44px 36px 58px 36px 44px;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    input,
+    button {
+      font: inherit;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+      padding: 7px 4px;
+      color: var(--text);
+      text-align: center;
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    button {
+      min-height: 36px;
+      padding: 8px 12px;
+      color: #fff;
+      cursor: pointer;
+      background: var(--primary);
+      border: 0;
+      border-radius: 8px;
+    }
+
+    button.secondary {
+      background: var(--secondary);
+    }
+
+    .qty button {
+      padding: 0;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .actions {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    .total {
+      padding-top: 16px;
+      font-size: clamp(1.6rem, 6vw, 2rem);
+      font-weight: 800;
+      text-align: right;
+    }
+
+    @media (max-width: 700px) {
+      .wrap {
+        padding: 12px;
+      }
+
+      .card {
+        padding: 14px;
+      }
+
+      th,
+      td {
+        padding: 8px 6px;
+        font-size: .9rem;
+      }
+
+      th:nth-child(2),
+      td:nth-child(2) {
+        display: none;
+      }
+
+      th:nth-child(1) { width: auto; }
+      th:nth-child(3) { width: 196px; }
+      th:nth-child(4) { width: 28%; }
+
+      .qty {
+        grid-template-columns: 38px 32px 48px 32px 38px;
+        gap: 4px;
+      }
+
+      .product {
+        gap: 8px;
+      }
+
+      .product img {
+        width: 52px;
+        height: 52px;
+        flex-basis: 52px;
+      }
+
+      .actions button {
+        flex: 1 1 160px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .wrap {
+        padding: 10px;
+      }
+
+      .card {
+        padding: 12px;
+        border-radius: 10px;
+      }
+
+      .top {
+        align-items: flex-start;
+      }
+
+      #theme {
+        min-width: 42px;
+        padding-inline: 10px;
+      }
+
+      table,
+      thead,
+      tbody,
+      tr,
+      th,
+      td {
+        display: block;
+      }
+
+      thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+
+      tbody {
+        display: grid;
+        gap: 12px;
+      }
+
+      tr {
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+
+      td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 0;
+        border: 0;
+      }
+
+      td::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        color: var(--muted);
+        font-size: .82rem;
+        font-weight: 700;
+      }
+
+      td:first-child {
+        display: block;
+        padding-top: 0;
+      }
+
+      td:first-child::before {
+        display: none;
+      }
+
+      td:nth-child(2) {
+        display: flex;
+      }
+
+      td:nth-child(2),
+      td:nth-child(4) {
+        text-align: right;
+      }
+
+      .product {
+        align-items: center;
+      }
+
+      .product img {
+        width: 72px;
+        height: 72px;
+        flex-basis: 72px;
+      }
+
+      .qty {
+        width: min(100%, 252px);
+        grid-template-columns: 44px 36px minmax(54px, 1fr) 36px 44px;
+        margin-left: auto;
+      }
+
+      .qty button,
+      .qty input {
+        min-height: 40px;
+      }
+
+      .total {
+        text-align: left;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      .actions button {
+        flex-basis: 100%;
+        min-height: 44px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card" aria-labelledby="page-title">
+      <div class="top">
+        <h1 id="page-title">Toxic_404 料金計算機</h1>
+        <button id="theme" type="button" aria-label="テーマを切り替える">🌙</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">商品</th>
+            <th scope="col">単価</th>
+            <th scope="col">数量</th>
+            <th scope="col">小計</th>
+          </tr>
+        </thead>
+        <tbody id="items"></tbody>
+      </table>
+
+      <div class="total">合計 ¥<span id="total">0</span></div>
+
+      <div class="actions">
+        <button id="copy" type="button">合計をコピー</button>
+        <button id="reset" class="secondary" type="button">すべて0にする</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const products = [
+      {
+        name: "Player_01(50%:50%)",
+        price: 200000,
+        image: "https://cdn.jsdelivr.net/gh/orokadayo/Toxic_404@main/T.PLAYER_01.png"
+      },
+      {
+        name: "GameOver(35%:35%)",
+        price: 100000,
+        image: "https://cdn.jsdelivr.net/gh/orokadayo/Toxic_404@main/T.GAMEOVER.png"
+      },
+      {
+        name: "Jackpot(50%:0%)",
+        price: 50000,
+        image: "https://cdn.jsdelivr.net/gh/orokadayo/Toxic_404@main/T.JACKPOT.png"
+      },
+      {
+        name: "SavePoint(0%:50%)",
+        price: 50000,
+        image: "https://cdn.jsdelivr.net/gh/orokadayo/Toxic_404@main/T.SAVEPOINT.png"
+      },
+      {
+        name: "OverRun",
+        price: 150000,
+        image: "https://cdn.jsdelivr.net/gh/orokadayo/Toxic_404@main/T.OVERRUN.png"
+      },
+      {
+        name: "OverHeat",
+        price: 300000,
+        image: "https://cdn.jsdelivr.net/gh/orokadayo/Toxic_404@main/T.OVERHEAT.png"
+      },
+      {
+        name: "NewGame",
+        price: 10000000,
+        image: "https://cdn.jsdelivr.net/gh/orokadayo/Toxic_404@main/T.NEW_GAME.png"
+      }
+    ];
+
+    const $ = document.querySelector.bind(document);
+    const items = $("#items");
+    const total = $("#total");
+    const copyButton = $("#copy");
+    const themeButton = $("#theme");
+    const formatter = new Intl.NumberFormat("ja-JP");
+    let quantities = JSON.parse(
+      localStorage.getItem("toxicPriceQuantities") || localStorage.getItem("qty") || "[]"
+    );
+
+    const yen = value => formatter.format(value);
+    const save = () => localStorage.setItem("toxicPriceQuantities", JSON.stringify(quantities));
+
+    function setQuantity(index, value) {
+      quantities[index] = Math.max(0, Number.parseInt(value, 10) || 0);
+      render();
+    }
+
+    function render() {
+      let sum = 0;
+
+      items.innerHTML = products.map((product, index) => {
+        const quantity = quantities[index] || 0;
+        const subtotal = product.price * quantity;
+        sum += subtotal;
+
+        return `
+          <tr>
+            <td>
+              <div class="product">
+                <img src="${product.image}" alt="${product.name}" width="64" height="64" loading="lazy" decoding="async">
+                <strong>${product.name}</strong>
+              </div>
+            </td>
+            <td data-label="単価">¥${yen(product.price)}</td>
+            <td data-label="数量">
+              <div class="qty">
+                <button type="button" data-step="-10" data-index="${index}" aria-label="${product.name}を10減らす">-10</button>
+                <button type="button" data-step="-1" data-index="${index}" aria-label="${product.name}を1減らす">−</button>
+                <input type="number" min="0" inputmode="numeric" value="${quantity}" data-index="${index}" aria-label="${product.name}の数量">
+                <button type="button" data-step="1" data-index="${index}" aria-label="${product.name}を1増やす">+</button>
+                <button type="button" data-step="10" data-index="${index}" aria-label="${product.name}を10増やす">+10</button>
+              </div>
+            </td>
+            <td data-label="小計">¥${yen(subtotal)}</td>
+          </tr>
+        `;
+      }).join("");
+
+      total.textContent = yen(sum);
+      save();
+    }
+
+    items.addEventListener("click", event => {
+      const button = event.target.closest("button[data-step]");
+      if (!button) return;
+
+      const index = Number(button.dataset.index);
+      setQuantity(index, (quantities[index] || 0) + Number(button.dataset.step));
+    });
+
+    items.addEventListener("change", event => {
+      if (event.target.matches("input[data-index]")) {
+        setQuantity(Number(event.target.dataset.index), event.target.value);
+      }
+    });
+
+    copyButton.addEventListener("click", async () => {
+      const rawTotal = total.textContent.replaceAll(",", "");
+
+      try {
+        await navigator.clipboard.writeText(rawTotal);
+      } catch {
+        window.prompt("合計をコピーしてください", rawTotal);
+      }
+
+      copyButton.textContent = "コピーしました";
+      setTimeout(() => {
+        copyButton.textContent = "合計をコピー";
+      }, 1200);
+    });
+
+    $("#reset").addEventListener("click", () => {
+      quantities = products.map(() => 0);
+      render();
+    });
+
+    themeButton.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      localStorage.setItem("toxicPriceDark", isDark ? "1" : "0");
+      themeButton.textContent = isDark ? "☀️" : "🌙";
+    });
+
+    if (localStorage.getItem("toxicPriceDark") === "1") {
+      document.body.classList.add("dark");
+      themeButton.textContent = "☀️";
+    }
+
+    render();
+  </script>
+</body>
+</html>
